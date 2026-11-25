@@ -1,66 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { GrindSurface } from "@/components/GrindSurface";
-import { LessonsSurface } from "@/components/LessonsSurface";
-import { TalkSurface } from "@/components/TalkSurface";
-import { defaultProfile, loadProfile, saveProfile } from "@/lib/store";
-import type { Profile, ShellTab } from "@/lib/types";
+import { useState } from "react";
+import { GovoritScreen } from "@/components/GovoritScreen";
+import { IdtiScreen } from "@/components/IdtiScreen";
+import { SestScreen } from "@/components/SestScreen";
 
-const TABS: { id: ShellTab; ru: string; en: string }[] = [
-  { id: "talk", ru: "Ара", en: "Home" },
-  { id: "lessons", ru: "Урок", en: "Lessons" },
-  { id: "grind", ru: "Grind", en: "Study" },
-];
+type Posture = "govorit" | "sest" | "idti";
+type SitStep = "hear" | "see" | "say";
 
 export function App() {
-  const [tab, setTab] = useState<ShellTab>("talk");
-  const [profile, setProfile] = useState<Profile>(defaultProfile());
-  const [ready, setReady] = useState(false);
+  const [posture, setPosture] = useState<Posture>("govorit");
+  const [sitStep, setSitStep] = useState<SitStep>("see");
 
-  useEffect(() => {
-    const p = loadProfile();
-    const next = { ...p, tutor: "ara" as const };
-    setProfile(next);
-    saveProfile(next);
-    setReady(true);
-  }, []);
-
-  if (!ready) {
+  if (posture === "sest") {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[var(--bg)]">
-        <p className="ru text-3xl tracking-[0.18em]">Ара</p>
-      </div>
+      <SestScreen
+        posture={posture}
+        onPosture={setPosture}
+        step={sitStep}
+        onStep={setSitStep}
+      />
     );
   }
 
-  return (
-    <div className="shell">
-      <div className="shell-main">
-        {tab === "talk" && <TalkSurface profile={profile} />}
-        {tab === "lessons" && (
-          <LessonsSurface
-            profile={profile}
-            onSpeakLesson={() => setTab("talk")}
-          />
-        )}
-        {tab === "grind" && <GrindSurface profile={profile} />}
-      </div>
+  if (posture === "idti") {
+    return <IdtiScreen posture={posture} onPosture={setPosture} />;
+  }
 
-      <nav className="dock" aria-label="Main">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            data-on={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            <span className="dock-mark" />
-            <span className="dock-label">{t.ru}</span>
-            <span className="dock-sub">{t.en}</span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
+  return <GovoritScreen posture={posture} onPosture={setPosture} />;
 }

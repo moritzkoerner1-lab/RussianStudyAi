@@ -6,29 +6,24 @@ const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
   variable: "--font-ui",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {
   title: "ВЖИВУЮ",
-  description:
-    "Russian as people actually say it — speak, overhear friends, walk the city with a live tutor.",
+  description: "Russian with Ara.",
   icons: { icon: "/favicon.svg" },
-  appleWebApp: {
-    title: "ВЖИВУЮ",
-    statusBarStyle: "black-translucent",
-  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f6f4ef",
+  themeColor: "#0e0e0c",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -37,12 +32,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${manrope.variable} ${cormorant.variable} antialiased`}>
+    <html lang="ru">
+      <body className={`${manrope.variable} ${cormorant.variable} ${manrope.className}`}>
         {children}
       </body>
     </html>
