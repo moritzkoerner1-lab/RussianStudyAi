@@ -157,14 +157,14 @@ export function WalkMode({ profile }: { profile: Profile }) {
   }
 
   return (
-    <div className="mode-enter flex h-full flex-col gap-3">
+    <div className="fade-up flex h-full flex-col gap-3">
       <header>
         <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--faint)]">
-          Real world · 20 min walk
+          Real world · ~20 min walk
         </p>
-        <h2 className="font-display text-3xl">Шаг</h2>
+        <h2 className="font-display text-4xl">Шаг</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
-              Point. Ask. Get corrected live — like a tutor in your pocket.
+          Point. Ask. Get corrected live — tutor in your pocket.
         </p>
       </header>
 
@@ -173,23 +173,23 @@ export function WalkMode({ profile }: { profile: Profile }) {
           ref={videoRef}
           playsInline
           muted
-          className={`aspect-[4/3] w-full object-cover ${camOn ? "opacity-100" : "opacity-0 absolute"}`}
+          className={`aspect-[4/3] w-full object-cover ${camOn ? "opacity-100" : "absolute opacity-0"}`}
         />
         {!camOn && (
-          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-[linear-gradient(145deg,#1a2740,#0c1220)] px-6 text-center text-white">
-            <p className="font-display text-2xl">Камера</p>
-            <p className="max-w-xs text-sm text-white/70">
+          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-[linear-gradient(145deg,#2a221c,#141210)] px-6 text-center">
+            <p className="font-display text-3xl text-[var(--fg)]">Камера</p>
+            <p className="max-w-xs text-sm text-[var(--muted)]">
               Turn it on when you walk. Name colors, walls, cars, animals —{" "}
               {TUTORS[profile.tutor].name} answers in Russian.
             </p>
             <button
               type="button"
               onClick={() => void enableCam()}
-              className="mt-2 rounded-full bg-[var(--signal)] px-5 py-3 text-sm font-semibold"
+              className="pill pill-fill mt-2"
             >
               Enable camera
             </button>
-            {camError && <p className="text-xs text-white/60">{camError}</p>}
+            {camError && <p className="text-xs text-[var(--faint)]">{camError}</p>}
           </div>
         )}
         {camOn && (
@@ -207,12 +207,12 @@ export function WalkMode({ profile }: { profile: Profile }) {
       </div>
 
       {labels.length > 0 && (
-        <div className="swipe-track">
+        <div className="h-rail">
           {labels.map((l) => (
             <button
               key={l}
               type="button"
-              className="swipe-item !flex-none rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-sm"
+              className="h-card pill text-sm"
               onClick={() => void send(`Это ${l}?`)}
             >
               {l}
@@ -225,17 +225,13 @@ export function WalkMode({ profile }: { profile: Profile }) {
         {messages.map((m) => (
           <div
             key={m.id}
-            className={`rounded-[1.1rem] px-4 py-3 ${
-              m.role === "user"
-                ? "ml-8 bg-[var(--ink)] text-white"
-                : "mr-4 border border-[var(--line)] bg-white/75"
-            }`}
+            className={m.role === "user" ? "bubble-user" : "bubble-tutor"}
           >
             <p className={m.role === "tutor" ? "ru-line text-lg" : "text-sm"}>
               {m.text}
             </p>
             {m.correction && (
-              <p className="mt-1 text-sm text-[var(--signal)]">→ {m.correction}</p>
+              <p className="mt-1 text-sm text-[var(--primary)]">→ {m.correction}</p>
             )}
             {m.translation && (
               <p className="mt-1 text-xs text-[var(--muted)]">{m.translation}</p>
@@ -244,7 +240,7 @@ export function WalkMode({ profile }: { profile: Profile }) {
         ))}
         {busy && (
           <div className="wave">
-            <span /><span /><span /><span /><span />
+            <i /><i /><i /><i /><i />
           </div>
         )}
       </div>
@@ -254,7 +250,7 @@ export function WalkMode({ profile }: { profile: Profile }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Что это? / Это зелёная стена…"
-          className="h-14 flex-1 rounded-full border border-[var(--line)] bg-white/80 px-4 outline-none"
+          className="input-dark h-14 flex-1 rounded-full px-4"
           onKeyDown={(e) => {
             if (e.key === "Enter") void send(draft);
           }}
@@ -262,14 +258,14 @@ export function WalkMode({ profile }: { profile: Profile }) {
         <button
           type="button"
           onClick={toggleListen}
-          className={`h-14 w-14 rounded-full text-white ${listening ? "bg-[var(--signal)]" : "bg-[var(--ink)]"}`}
+          className={`h-14 w-14 rounded-full ${listening ? "mic-live bg-[var(--primary)]" : "bg-[var(--fg)]"} text-[var(--ink)]`}
         >
           ●
         </button>
         <button
           type="button"
           onClick={() => void send(draft)}
-          className="h-14 rounded-full bg-[var(--signal)] px-5 font-semibold text-white"
+          className="pill pill-fill h-14 px-5"
         >
           Ask
         </button>

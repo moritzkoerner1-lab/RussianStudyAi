@@ -1,7 +1,14 @@
 export type TutorId = "ara" | "lev";
 export type HelpLang = "en" | "de";
 export type NoteKind = "word" | "grammar" | "usecase" | "phrase";
-export type AppMode = "home" | "speak" | "walk" | "drill" | "notebook" | "path";
+export type AppMode =
+  | "home"
+  | "speak"
+  | "overhear"
+  | "walk"
+  | "drill"
+  | "notebook"
+  | "path";
 
 export type Chunk = {
   id: string;

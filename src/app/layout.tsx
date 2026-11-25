@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Literata, Onest } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 
-const onest = Onest({
+const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
   variable: "--font-ui",
   display: "swap",
 });
 
-const literata = Literata({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
 });
@@ -17,19 +19,20 @@ const literata = Literata({
 export const metadata: Metadata = {
   title: "ВЖИВУЮ",
   description:
-    "Russian as people actually say it — speak with Ara or Lev, drill Moscow lines, walk the world with a live tutor.",
+    "Russian as people actually say it — speak, overhear friends, walk the city with a live tutor.",
   icons: { icon: "/favicon.svg" },
   appleWebApp: {
     title: "ВЖИВУЮ",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#eef2f6",
+  themeColor: "#141210",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -39,8 +42,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${onest.variable} ${literata.variable} antialiased`}>
-        <div className="app-shell">{children}</div>
+      <body className={`${manrope.variable} ${cormorant.variable} antialiased`}>
+        {children}
       </body>
     </html>
   );

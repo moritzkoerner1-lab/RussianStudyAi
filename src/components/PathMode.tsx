@@ -33,16 +33,16 @@ export function PathMode({
   const until = daysUntil(profile.landOn);
 
   return (
-    <div className="mode-enter flex h-full flex-col">
+    <div className="fade-up flex h-full flex-col">
       <header className="mb-3">
         <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--faint)]">
           Viewing day {selected} · you are on day {dayNow} · {until} until landing
         </p>
-        <h2 className="font-display text-3xl">{plan.titleRu}</h2>
+        <h2 className="font-display text-4xl">{plan.titleRu}</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">{plan.mission}</p>
       </header>
 
-      <div className="swipe-track mb-4">
+      <div className="h-rail mb-4">
         {DAYS.map((d) => {
           const active = d.day === selected;
           const finished = done.includes(d.day);
@@ -55,15 +55,14 @@ export function PathMode({
                 setSitting("read");
                 setHidden(false);
               }}
-              className="swipe-item !flex-none rounded-[1.2rem] border px-4 py-3 text-left"
+              className="h-card rounded-[1.2rem] border px-4 py-3 text-left"
               style={{
                 width: "8.5rem",
-                borderColor: active ? "var(--ink)" : "var(--line)",
-                background: active ? "var(--ink)" : "rgba(255,255,255,0.65)",
-                color: active ? "#fff" : "var(--ink)",
+                borderColor: active ? "var(--primary)" : "var(--line)",
+                background: active ? "var(--raised)" : "var(--surface)",
               }}
             >
-              <span className="text-[11px] uppercase tracking-wider opacity-70">
+              <span className="text-[11px] uppercase tracking-wider text-[var(--faint)]">
                 Day {d.day}
                 {finished ? " · ✓" : ""}
               </span>
@@ -90,9 +89,9 @@ export function PathMode({
             }}
             className="rounded-[1rem] border px-3 py-3 text-left"
             style={{
-              borderColor: sitting === id ? "var(--signal)" : "var(--line)",
+              borderColor: sitting === id ? "var(--primary)" : "var(--line)",
               background:
-                sitting === id ? "rgba(196,30,58,0.08)" : "rgba(255,255,255,0.55)",
+                sitting === id ? "rgba(226,90,50,0.1)" : "var(--surface)",
             }}
           >
             <span className="block text-sm font-semibold">{label}</span>
@@ -107,7 +106,7 @@ export function PathMode({
             key={c.id}
             type="button"
             onClick={() => void speakRu(c.ru)}
-            className="w-full rounded-[1.1rem] border border-[var(--line)] bg-white/70 px-4 py-3 text-left"
+            className="surface w-full px-4 py-3 text-left"
           >
             <p className="ru-line text-xl">
               {hidden && sitting !== "read" ? "••••••••••" : c.ru}
@@ -125,7 +124,7 @@ export function PathMode({
         <button
           type="button"
           onClick={() => onSpeakLesson(plan.speakPrompt)}
-          className="h-14 rounded-full bg-[var(--signal)] text-sm font-semibold text-white"
+          className="pill pill-fill h-14 text-sm"
         >
           Speak this day with {profile.tutor === "lev" ? "Lev" : "Ara"}
         </button>
@@ -135,7 +134,7 @@ export function PathMode({
             markDayDone(plan.day);
             setDone(loadPathDone());
           }}
-          className="h-12 rounded-full border border-[var(--line)] text-sm"
+          className="pill h-12 text-sm"
         >
           Mark day done
         </button>

@@ -77,39 +77,39 @@ export function NotebookMode() {
   }
 
   return (
-    <div className="mode-enter flex h-full flex-col">
+    <div className="fade-up flex h-full flex-col">
       <header className="mb-4">
         <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--faint)]">
           One beautiful pile
         </p>
-        <h2 className="font-display text-3xl">Тетрадь</h2>
+        <h2 className="font-display text-4xl">Тетрадь</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
           Words, grammar, use cases — auto-sorted as you save.
         </p>
       </header>
 
-      <div className="glass rounded-[1.4rem] p-4">
+      <div className="surface p-4">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
           placeholder="Сохраните слово, правило или фразу…"
-          className="w-full resize-none rounded-[1rem] border border-[var(--line)] bg-white/80 px-3 py-3 outline-none focus:border-[var(--signal)]"
+          className="input-dark resize-none px-3 py-3"
         />
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Optional note"
-          className="mt-2 h-11 w-full rounded-full border border-[var(--line)] bg-white/70 px-4 text-sm outline-none"
+          className="input-dark mt-2 h-11 rounded-full px-4 text-sm"
         />
         <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="rounded-full bg-[rgba(47,93,140,0.12)] px-3 py-1 text-xs font-semibold text-[var(--steel)]">
+          <span className="rounded-full bg-[rgba(226,90,50,0.14)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">
             {LABELS[pendingKind]}
           </span>
           <button
             type="button"
             onClick={() => void save()}
-            className="h-11 rounded-full bg-[var(--ink)] px-5 text-sm font-semibold text-white"
+            className="pill pill-ink px-5 text-sm"
           >
             Keep
           </button>
@@ -122,11 +122,10 @@ export function NotebookMode() {
             key={k}
             type="button"
             onClick={() => setFilter(k)}
-            className="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold"
+            className="pill shrink-0 text-xs font-semibold"
             style={{
-              background: filter === k ? "var(--ink)" : "transparent",
-              color: filter === k ? "#fff" : "var(--muted)",
-              border: filter === k ? "none" : "1px solid var(--line)",
+              background: filter === k ? "var(--fg)" : "transparent",
+              color: filter === k ? "var(--ink)" : "var(--muted)",
             }}
           >
             {k === "all" ? "All" : LABELS[k]}
@@ -137,14 +136,11 @@ export function NotebookMode() {
       <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pb-4">
         {visible.length === 0 && (
           <p className="py-10 text-center text-sm text-[var(--faint)]">
-            Empty for now. Save corrections from Speak and Walk — they land here.
+            Empty for now. Corrections from Speak and Walk land here.
           </p>
         )}
         {visible.map((n) => (
-          <article
-            key={n.id}
-            className="rounded-[1.2rem] border border-[var(--line)] bg-white/70 px-4 py-3"
-          >
+          <article key={n.id} className="surface px-4 py-3">
             <div className="flex items-start justify-between gap-2">
               <p className="ru-line text-xl leading-snug">{n.text}</p>
               <button
@@ -168,8 +164,8 @@ export function NotebookMode() {
                   className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider"
                   style={{
                     background:
-                      n.kind === k ? "rgba(196,30,58,0.12)" : "transparent",
-                    color: n.kind === k ? "var(--signal)" : "var(--faint)",
+                      n.kind === k ? "rgba(226,90,50,0.16)" : "transparent",
+                    color: n.kind === k ? "var(--primary)" : "var(--faint)",
                   }}
                 >
                   {LABELS[k]}
