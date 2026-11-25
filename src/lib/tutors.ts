@@ -1,163 +1,161 @@
-import type { HelpLang, TutorId } from "./types";
+import type { HelpLang } from "./types";
 
-export const TUTORS: Record<
-  TutorId,
-  {
-    id: TutorId;
-    name: string;
-    nameRu: string;
-    voiceHint: string;
-    blurb: string;
-    blurbDe: string;
-    accent: string;
-  }
-> = {
-  ara: {
-    id: "ara",
-    name: "Ara",
-    nameRu: "Ара",
-    voiceHint: "warm, clear Moscow female",
-    blurb: "Warm native tutor. Corrects gently, keeps you talking.",
-    blurbDe: "Warme Muttersprachlerin. Korrigiert sanft, hält dich im Gespräch.",
-    accent: "#C41E3A",
-  },
-  lev: {
-    id: "lev",
-    name: "Lev",
-    nameRu: "Лев",
-    voiceHint: "calm, precise Moscow male",
-    blurb: "Calm native tutor. Precise fixes, then back to the line.",
-    blurbDe: "Ruhiger Muttersprachler. Präzise Korrektur, dann zurück zur Linie.",
-    accent: "#1F4E79",
-  },
+export const ARA = {
+  id: "ara" as const,
+  name: "Ara",
+  nameRu: "Ара",
+  voiceHint: "warm, brief Moscow female — close native teacher",
 };
 
-export function tutorSystemPrompt(
-  tutor: TutorId,
+export function araSystemPrompt(
   helpLang: HelpLang,
   learnerName: string,
   genderPast: "был" | "была",
-  mode: "speak" | "walk" | "lesson",
-  lessonHint?: string,
+  ownedHint?: string,
 ): string {
-  const t = TUTORS[tutor];
   const help =
     helpLang === "de"
-      ? "When the learner is stuck, briefly help in German, then return to Russian."
-      : "When the learner is stuck, briefly help in English, then return to Russian.";
+      ? "HELP line only when truly needed — one short German sentence."
+      : "HELP line only when truly needed — one short English sentence.";
 
   return [
-    `You are ${t.name} (${t.nameRu}), a native Russian-speaking tutor from Moscow.`,
-    `Voice: ${t.voiceHint}. Speak mostly in Russian. Sound natural, not textbook.`,
-    `Learner name: ${learnerName || "друг"}. Past tense gender form they use: ${genderPast}.`,
-    `Mission: get them conversational for Moscow in ~2 weeks — taxi, food, metro, grandma talks, daily errands.`,
-    `Method: volume of usable lines. Prefer short exchanges. Correct errors immediately with the right line, then continue.`,
-    `Never dump grammar lectures. Embed grammar inside the correct sentence.`,
+    `You are Ара (Ara): a close native Russian teacher in Moscow who remembers yesterday.`,
+    `Warm. Brief. You speak Russian first. You are the only tutor.`,
+    `Learner: ${learnerName || "друг"}. Past gender form: ${genderPast}.`,
+    `Items they own (heard/mastered) — prefer these; do not invent new lemmas they have not heard, except the tiny survival set (здравствуйте, спасибо, пожалуйста, извините, да, нет, медленнее, не понимаю):`,
+    ownedHint || "(survival set only)",
+    `Persona rules:`,
+    `- Never praise a mistake.`,
+    `- One miss → give the right Moscow line → one retry. Then continue.`,
+    `- If their line is understandable but not what Moscow says, say the native line aloud (do not celebrate the near-miss).`,
+    `- If native: answer «Да.» and continue.`,
+    `- No lesson gates. No menus. Stay in one conversation.`,
+    `- If they say «покажи» / «show me», attach SEE for the last bend.`,
     help,
     `Response format (strict):`,
-    `1) One short Russian reply the learner should hear/say next (or a correction).`,
-    `2) If you corrected them, include CORRECT: <right Russian line>`,
-    `3) Optionally HELP: <one short ${helpLang === "de" ? "German" : "English"} tip>`,
-    `Keep each turn under 3 short lines of Russian.`,
-    mode === "walk"
-      ? "Mode: WALK. The learner may describe what they see or ask what something is. Name objects, colors, actions in Russian. If a photo description is given, ground your Russian in what is visible."
-      : mode === "lesson"
-        ? `Mode: LESSON. Focus: ${lessonHint || "today's Moscow lines"}. Drill the lines out loud. Push retrieval, not reading.`
-        : "Mode: FREE SPEAK. Hold a living conversation. Steer toward situations they will face in Moscow.",
+    `1) Short Russian (1–2 lines).`,
+    `2) Optional NATIVE: <exact Moscow line to say>`,
+    `3) Optional SEE: <stressed bend> || <full audio line> || <optional one help-language sentence>`,
+    `   Stress with combining acute (́) on the stressed vowel, e.g. спаси́бо, пожа́луйста.`,
+    `4) Optional HELP: <one short tip> — only if stuck.`,
+    `Keep it spoken, not textbook.`,
   ].join("\n");
 }
 
-export type MockTurn = {
+export type AraTurn = {
   reply: string;
-  correction?: string;
+  native?: string;
+  see?: { bend: string; audio: string; gloss?: string };
   help?: string;
 };
 
-/** Offline demo tutor so training works before OPENAI_API_KEY is bound. */
-export function mockTutorReply(
+export function mockAraReply(
   userText: string,
-  tutor: TutorId,
   helpLang: HelpLang,
-  mode: "speak" | "walk" | "lesson",
-): MockTurn {
-  const name = TUTORS[tutor].nameRu;
+  ownedOpening?: { reply: string; see: { bend: string; audio: string; gloss?: string } },
+): AraTurn {
   const raw = userText.trim();
   const lower = raw.toLowerCase();
 
-  if (!raw) {
+  if (!raw && ownedOpening) {
+    return { reply: ownedOpening.reply, see: ownedOpening.see };
+  }
+
+  if (/покажи|show me|zeig/i.test(lower)) {
     return {
-      reply: mode === "walk" ? "Что вы видите? Скажите по-русски." : "Здравствуйте! Как вас зовут?",
-      help: helpLang === "de" ? "Sag deinen Namen auf Russisch." : "Say your name in Russian.",
+      reply: "Вот.",
+      see: {
+        bend: "пожа́луйста",
+        audio: "Пожа́луйста.",
+        gloss: helpLang === "de" ? "Bitte." : "Please / you're welcome.",
+      },
     };
   }
 
-  // Soft corrections for common beginner patterns
-  if (/меня зовут/i.test(raw) && !/меня зовут /.test(raw)) {
+  if (/здравств/i.test(lower)) {
     return {
-      reply: "Отлично. Очень приятно!",
-      correction: "Меня зовут …",
+      reply: "Здра́вствуйте. Как вас зову́т?",
+      see: {
+        bend: "зову́т",
+        audio: "Как вас зову́т?",
+        gloss: helpLang === "de" ? "Wie heißen Sie?" : undefined,
+      },
     };
   }
 
-  if (/привет|здравств/i.test(lower) && mode !== "walk") {
+  if (/меня зовут|зовут/i.test(lower)) {
     return {
-      reply: `Здравствуйте! Я ${name}. Как вас зовут?`,
-      help: helpLang === "de" ? "Antworte: Меня зовут …" : "Answer: Меня зовут …",
+      reply: "Да. О́чень прия́тно.",
+      see: {
+        bend: "прия́тно",
+        audio: "О́чень прия́тно.",
+      },
     };
   }
 
-  if (/где|what is|was ist|это/i.test(lower) || mode === "walk") {
-    if (/стен|wall|wand/i.test(lower)) {
-      return {
-        reply: "Это стена. Какого она цвета?",
-        help: helpLang === "de" ? "Farbe: зелёная / синяя / белая…" : "Color: зелёная / синяя / белая…",
-      };
-    }
-    if (/машин|car|auto/i.test(lower)) {
-      return {
-        reply: "Это машина. Она большая или маленькая?",
-      };
-    }
-    if (/дерев|tree|baum/i.test(lower)) {
-      return {
-        reply: "Это дерево. Красивое дерево!",
-      };
-    }
-    return {
-      reply: "Хорошо. Скажите: «Это …» и название.",
-      help:
-        helpLang === "de"
-          ? "Muster: Это зелёная стена."
-          : "Pattern: Это зелёная стена.",
-    };
-  }
-
-  if (/такси|арбат|метро|борщ|бабушк/i.test(lower)) {
-    return {
-      reply: "Хорошо, продолжайте. Говорите полными фразами.",
-      help:
-        helpLang === "de"
-          ? "Versuch einen ganzen Satz, nicht nur ein Wort."
-          : "Try a full sentence, not just one word.",
-    };
-  }
-
-  // Generic gentle correction path: echo a cleaner line if Latin-heavy
   if (/[a-z]/i.test(raw) && !/[а-яё]/i.test(raw)) {
     return {
-      reply: "По-русски, пожалуйста. Я помогу.",
-      help:
-        helpLang === "de"
-          ? "Versuch es auf Russisch — ich helfe."
-          : "Try it in Russian — I'll help.",
+      reply: "По-ру́сски. Ещё раз.",
+      native: "По-ру́сски, пожа́луйста.",
+      see: {
+        bend: "по-ру́сски",
+        audio: "По-ру́сски, пожа́луйста.",
+        gloss: helpLang === "de" ? "Auf Russisch bitte." : "In Russian, please.",
+      },
+    };
+  }
+
+  // Soft near-miss path
+  if (raw.length > 0 && raw.length < 40) {
+    return {
+      reply: "Да.",
     };
   }
 
   return {
-    reply: "Хорошо. Ещё раз, чуть медленнее… Теперь ваш ход: спросите что-нибудь.",
-    help:
-      helpLang === "de"
-        ? "Frag etwas: Где метро? Сколько стоит?"
-        : "Ask something: Где метро? Сколько стоит?",
+    reply: "Ещё раз, чуть ме́дленнее.",
+    see: {
+      bend: "ме́дленнее",
+      audio: "Говори́те ме́дленнее.",
+      gloss: helpLang === "de" ? "Sprechen Sie langsamer." : "Speak more slowly.",
+    },
   };
+}
+
+/** @deprecated — keep import paths compiling during migration */
+export const TUTORS = {
+  ara: { ...ARA, blurb: "", blurbDe: "", accent: "#7a1b28" },
+  lev: {
+    id: "lev" as const,
+    name: "Lev",
+    nameRu: "Лев",
+    voiceHint: "",
+    blurb: "",
+    blurbDe: "",
+    accent: "#7a1b28",
+  },
+};
+
+export function tutorSystemPrompt(
+  _tutor: "ara" | "lev",
+  helpLang: HelpLang,
+  learnerName: string,
+  genderPast: "был" | "была",
+  _mode: "speak" | "walk" | "lesson",
+  lessonHint?: string,
+) {
+  return araSystemPrompt(helpLang, learnerName, genderPast, lessonHint);
+}
+
+export type MockTurn = AraTurn & { correction?: string };
+
+export function mockTutorReply(
+  userText: string,
+  _tutor: "ara" | "lev",
+  helpLang: HelpLang,
+  mode?: "speak" | "walk" | "lesson",
+): MockTurn {
+  void mode;
+  const t = mockAraReply(userText, helpLang);
+  return { ...t, correction: t.native };
 }

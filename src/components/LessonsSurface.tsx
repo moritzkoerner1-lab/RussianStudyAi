@@ -16,7 +16,7 @@ export function LessonsSurface({
   onSpeakLesson,
 }: {
   profile: Profile;
-  onSpeakLesson: (hint: string) => void;
+  onSpeakLesson: () => void;
 }) {
   const dayNow = currentDayIndex(profile.startedOn);
   const [selected, setSelected] = useState(dayNow);
@@ -110,9 +110,9 @@ export function LessonsSurface({
         <button
           type="button"
           className="cta w-full"
-          onClick={() => onSpeakLesson(plan.speakPrompt)}
+          onClick={() => onSpeakLesson()}
         >
-          Practice with {profile.tutor === "lev" ? "Lev" : "Ara"}
+          Continue with Ara
         </button>
         <button
           type="button"

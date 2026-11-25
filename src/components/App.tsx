@@ -8,7 +8,7 @@ import { defaultProfile, loadProfile, saveProfile } from "@/lib/store";
 import type { Profile, ShellTab } from "@/lib/types";
 
 const TABS: { id: ShellTab; ru: string; en: string }[] = [
-  { id: "talk", ru: "Говор", en: "Talk" },
+  { id: "talk", ru: "Ара", en: "Home" },
   { id: "lessons", ru: "Урок", en: "Lessons" },
   { id: "grind", ru: "Grind", en: "Study" },
 ];
@@ -16,23 +16,20 @@ const TABS: { id: ShellTab; ru: string; en: string }[] = [
 export function App() {
   const [tab, setTab] = useState<ShellTab>("talk");
   const [profile, setProfile] = useState<Profile>(defaultProfile());
-  const [lessonHint, setLessonHint] = useState<string | undefined>();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setProfile(loadProfile());
-    setReady(true);
-  }, []);
-
-  function updateProfile(next: Profile) {
+    const p = loadProfile();
+    const next = { ...p, tutor: "ara" as const };
     setProfile(next);
     saveProfile(next);
-  }
+    setReady(true);
+  }, []);
 
   if (!ready) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[var(--bg)]">
-        <p className="ru text-3xl tracking-[0.18em]">ВЖИВУЮ</p>
+        <p className="ru text-3xl tracking-[0.18em]">Ара</p>
       </div>
     );
   }
@@ -40,20 +37,11 @@ export function App() {
   return (
     <div className="shell">
       <div className="shell-main">
-        {tab === "talk" && (
-          <TalkSurface
-            profile={profile}
-            onProfile={updateProfile}
-            lessonHint={lessonHint}
-          />
-        )}
+        {tab === "talk" && <TalkSurface profile={profile} />}
         {tab === "lessons" && (
           <LessonsSurface
             profile={profile}
-            onSpeakLesson={(hint) => {
-              setLessonHint(hint);
-              setTab("talk");
-            }}
+            onSpeakLesson={() => setTab("talk")}
           />
         )}
         {tab === "grind" && <GrindSurface profile={profile} />}
@@ -65,10 +53,7 @@ export function App() {
             key={t.id}
             type="button"
             data-on={tab === t.id}
-            onClick={() => {
-              if (t.id !== "talk") setLessonHint(undefined);
-              setTab(t.id);
-            }}
+            onClick={() => setTab(t.id)}
           >
             <span className="dock-mark" />
             <span className="dock-label">{t.ru}</span>

@@ -1,17 +1,15 @@
-import { mockTutorReply, tutorSystemPrompt } from "@/lib/tutors";
-import type { HelpLang, TutorId } from "@/lib/types";
+import { araSystemPrompt, mockAraReply } from "@/lib/tutors";
+import type { HelpLang } from "@/lib/types";
 
 export const runtime = "nodejs";
 
 type Body = {
-  messages?: { role: "user" | "tutor" | "system"; text: string }[];
-  tutor?: TutorId;
+  messages?: { role: "user" | "ara" | "tutor" | "system"; text: string }[];
   helpLang?: HelpLang;
-  mode?: "speak" | "walk" | "lesson";
   learnerName?: string;
   genderPast?: "был" | "была";
-  lessonHint?: string;
-  visionHint?: string;
+  ownedHint?: string;
+  opening?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -22,46 +20,34 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const tutor = body.tutor === "lev" ? "lev" : "ara";
   const helpLang = body.helpLang === "de" ? "de" : "en";
-  const mode = body.mode ?? "speak";
   const lastUser =
     [...(body.messages || [])].reverse().find((m) => m.role === "user")?.text ||
     "";
 
   const key = process.env.OPENAI_API_KEY?.trim();
   if (!key) {
-    const mock = mockTutorReply(lastUser, tutor, helpLang, mode);
-    return Response.json({
-      ...mock,
-      provider: "demo",
-      demo: true,
-    });
+    const mock = mockAraReply(lastUser, helpLang);
+    return Response.json({ ...mock, provider: "demo", demo: true });
   }
 
-  const system = tutorSystemPrompt(
-    tutor,
+  const system = araSystemPrompt(
     helpLang,
     body.learnerName || "",
     body.genderPast || "был",
-    mode,
-    body.lessonHint,
+    body.ownedHint,
   );
 
   const history = (body.messages || [])
     .filter((m) => m.role !== "system")
-    .slice(-12)
+    .slice(-16)
     .map((m) => ({
-      role: m.role === "tutor" ? ("assistant" as const) : ("user" as const),
+      role:
+        m.role === "ara" || m.role === "tutor"
+          ? ("assistant" as const)
+          : ("user" as const),
       content: m.text,
     }));
-
-  if (body.visionHint) {
-    history.push({
-      role: "user",
-      content: `[What I see / camera]: ${body.visionHint}`,
-    });
-  }
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -72,49 +58,80 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.6,
+        temperature: 0.55,
         messages: [{ role: "system", content: system }, ...history],
       }),
     });
 
     if (!res.ok) {
-      const mock = mockTutorReply(lastUser, tutor, helpLang, mode);
-      return Response.json({ ...mock, provider: "demo", demo: true, upstream: res.status });
+      const mock = mockAraReply(lastUser, helpLang);
+      return Response.json({
+        ...mock,
+        provider: "demo",
+        demo: true,
+        upstream: res.status,
+      });
     }
 
     const data = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
     const content = data.choices?.[0]?.message?.content?.trim() || "";
-    const parsed = parseTutorOutput(content);
-    return Response.json({ ...parsed, provider: "openai", demo: false });
+    return Response.json({
+      ...parseAraOutput(content),
+      provider: "openai",
+      demo: false,
+    });
   } catch {
-    const mock = mockTutorReply(lastUser, tutor, helpLang, mode);
+    const mock = mockAraReply(lastUser, helpLang);
     return Response.json({ ...mock, provider: "demo", demo: true });
   }
 }
 
-function parseTutorOutput(content: string): {
+function parseAraOutput(content: string): {
   reply: string;
-  correction?: string;
+  native?: string;
+  see?: { bend: string; audio: string; gloss?: string };
   help?: string;
 } {
-  const lines = content.split("\n").map((l) => l.trim()).filter(Boolean);
-  let correction: string | undefined;
+  const lines = content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  let native: string | undefined;
   let help: string | undefined;
+  let see: { bend: string; audio: string; gloss?: string } | undefined;
   const replyLines: string[] = [];
 
   for (const line of lines) {
-    const c = line.match(/^CORRECT:\s*(.+)$/i);
+    const n = line.match(/^NATIVE:\s*(.+)$/i);
     const h = line.match(/^HELP:\s*(.+)$/i);
-    if (c) correction = c[1];
-    else if (h) help = h[1];
-    else replyLines.push(line.replace(/^\d+[).]\s*/, ""));
+    const s = line.match(/^SEE:\s*(.+)$/i);
+    if (n) {
+      native = n[1];
+      continue;
+    }
+    if (h) {
+      help = h[1];
+      continue;
+    }
+    if (s) {
+      const parts = s[1].split("||").map((p) => p.trim());
+      see = {
+        bend: parts[0] || "",
+        audio: parts[1] || parts[0] || "",
+        gloss: parts[2] || undefined,
+      };
+      continue;
+    }
+    replyLines.push(line.replace(/^\d+[).]\s*/, ""));
   }
 
   return {
     reply: replyLines.join("\n") || content,
-    correction,
+    native,
+    see: see?.bend ? see : undefined,
     help,
   };
 }
