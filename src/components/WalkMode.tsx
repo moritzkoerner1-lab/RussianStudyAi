@@ -176,7 +176,11 @@ export function WalkMode({ profile }: { profile: Profile }) {
           className={`aspect-[4/3] w-full object-cover ${camOn ? "opacity-100" : "absolute opacity-0"}`}
         />
         {!camOn && (
-          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-[linear-gradient(145deg,#2a221c,#141210)] px-6 text-center">
+          <div className="corner-marks flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-[linear-gradient(165deg,#fbfaf7,#ebe8e1)] px-6 text-center">
+            <span className="hud-chip">
+              <span className="dot" />
+              vision standby
+            </span>
             <p className="font-display text-3xl text-[var(--fg)]">Камера</p>
             <p className="max-w-xs text-sm text-[var(--muted)]">
               Turn it on when you walk. Name colors, walls, cars, animals —{" "}
@@ -258,7 +262,7 @@ export function WalkMode({ profile }: { profile: Profile }) {
         <button
           type="button"
           onClick={toggleListen}
-          className={`h-14 w-14 rounded-full ${listening ? "mic-live bg-[var(--primary)]" : "bg-[var(--fg)]"} text-[var(--ink)]`}
+          className={`h-14 w-14 rounded-full text-white ${listening ? "mic-live bg-[var(--primary)]" : "bg-[var(--fg)]"}`}
         >
           ●
         </button>

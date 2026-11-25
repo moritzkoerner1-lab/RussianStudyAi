@@ -121,6 +121,12 @@ export function SpeakMode({
     <div className="fade-up flex h-full min-h-[70vh] flex-col">
       <header className="mb-3 flex items-start justify-between gap-3">
         <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="hud-chip">
+              <span className="dot" />
+              channel open
+            </span>
+          </div>
           <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--faint)]">
             Live tutor · swipe to Overhear
           </p>
@@ -217,7 +223,7 @@ export function SpeakMode({
         )}
       </div>
 
-      <div className="sticky bottom-0 space-y-2 border-t border-[var(--line)] bg-[var(--bg)]/95 pt-3 backdrop-blur">
+      <div className="sticky bottom-0 space-y-2 border-t border-[var(--line)] bg-[rgba(243,241,236,0.92)] pt-3 backdrop-blur">
         <div className="flex items-end gap-2">
           <textarea
             value={draft}
@@ -232,21 +238,23 @@ export function SpeakMode({
               }
             }}
           />
-          <button
-            type="button"
-            onClick={toggleListen}
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-[var(--ink)] ${
-              listening ? "mic-live bg-[var(--primary)]" : "bg-[var(--fg)]"
-            }`}
-            aria-label="Microphone"
-          >
-            ●
-          </button>
+          <div className={`hud-ring ${listening ? "mic-live" : ""}`}>
+            <button
+              type="button"
+              onClick={toggleListen}
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white ${
+                listening ? "bg-[var(--primary)]" : "bg-[var(--fg)]"
+              }`}
+              aria-label="Microphone"
+            >
+              ●
+            </button>
+          </div>
           <button
             type="button"
             onClick={() => void send(draft)}
             disabled={!draft.trim() || busy}
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] font-semibold text-[var(--ink)] disabled:opacity-40"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] font-semibold text-white disabled:opacity-40"
             aria-label="Send"
           >
             ↑
