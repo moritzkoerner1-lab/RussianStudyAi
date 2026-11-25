@@ -99,10 +99,10 @@ export function mockTutorReply(
     };
   }
 
-  if (/привет/i.test(lower) && mode !== "walk") {
+  if (/привет|здравств/i.test(lower) && mode !== "walk") {
     return {
-      reply: `Здравствуйте! Я ${name}. Как дела?`,
-      help: helpLang === "de" ? "Antworte: Хорошо, спасибо." : "Answer: Хорошо, спасибо.",
+      reply: `Здравствуйте! Я ${name}. Как вас зовут?`,
+      help: helpLang === "de" ? "Antworte: Меня зовут …" : "Answer: Меня зовут …",
     };
   }
 

@@ -167,8 +167,8 @@ export function DrillMode({ profile }: { profile: Profile }) {
           <div className="anim-rise mt-6">
             <p className="text-sm text-[var(--muted)]">Tap words into the line</p>
             <p className="mt-1 text-sm text-[var(--faint)]">{sentGloss}</p>
-            <div className="mt-4 min-h-16 rounded-[1rem] border border-dashed border-[var(--line)] bg-white/60 p-3">
-              <p className="ru-line text-2xl">
+            <div className="mt-4 min-h-20 rounded-[1rem] border border-dashed border-[var(--line)] bg-white/60 p-3">
+              <p className="ru-line text-2xl leading-snug">
                 {tokens.join(" ") || "…"}
               </p>
             </div>
@@ -207,7 +207,7 @@ export function DrillMode({ profile }: { profile: Profile }) {
                   mark(item, ok);
                   setFeedback(ok ? "Да. В точку." : `Близко → ${sentence.ru}`);
                   void speakRu(sentence.ru);
-                  if (ok) setTimeout(next, 700);
+                  if (ok) setTimeout(next, 1100);
                 }}
               >
                 Check

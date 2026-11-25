@@ -164,7 +164,7 @@ export function WalkMode({ profile }: { profile: Profile }) {
         </p>
         <h2 className="font-display text-3xl">Шаг</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Point. Ask. Get corrected live — like a tutor in your pocket.
+              Point. Ask. Get corrected live — like a tutor in your pocket.
         </p>
       </header>
 
@@ -179,7 +179,7 @@ export function WalkMode({ profile }: { profile: Profile }) {
           <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-[linear-gradient(145deg,#1a2740,#0c1220)] px-6 text-center text-white">
             <p className="font-display text-2xl">Камера</p>
             <p className="max-w-xs text-sm text-white/70">
-              Turn it on when you walk. Name colors, walls, cars, animals —
+              Turn it on when you walk. Name colors, walls, cars, animals —{" "}
               {TUTORS[profile.tutor].name} answers in Russian.
             </p>
             <button

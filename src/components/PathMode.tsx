@@ -36,7 +36,7 @@ export function PathMode({
     <div className="mode-enter flex h-full flex-col">
       <header className="mb-3">
         <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--faint)]">
-          Day {dayNow} of 14 · {until} days until you land
+          Viewing day {selected} · you are on day {dayNow} · {until} until landing
         </p>
         <h2 className="font-display text-3xl">{plan.titleRu}</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">{plan.mission}</p>

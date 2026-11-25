@@ -26,15 +26,18 @@ export function SpeakMode({
 
   useEffect(() => {
     const t = TUTORS[profile.tutor];
+    const opener = lessonHint
+      ? `Здравствуйте${profile.name ? `, ${profile.name}` : ""}! Я ${t.nameRu}. Сегодня: ${lessonHint}`
+      : `Здравствуйте${profile.name ? `, ${profile.name}` : ""}! Я ${t.nameRu}. Давайте говорить.`;
     setMessages([
       {
-        id: "boot",
+        id: `boot_${lessonHint || "free"}`,
         role: "tutor",
-        text: `Здравствуйте${profile.name ? `, ${profile.name}` : ""}! Я ${t.nameRu}. Давайте говорить.`,
+        text: opener,
         at: Date.now(),
       },
     ]);
-  }, [profile.tutor, profile.name]);
+  }, [profile.tutor, profile.name, lessonHint]);
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
