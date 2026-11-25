@@ -1,14 +1,12 @@
 export type TutorId = "ara" | "lev";
 export type HelpLang = "en" | "de";
 export type NoteKind = "word" | "grammar" | "usecase" | "phrase";
-export type AppMode =
-  | "home"
-  | "speak"
-  | "overhear"
-  | "walk"
-  | "drill"
-  | "notebook"
-  | "path";
+
+/** Three surfaces only — smartphone shell */
+export type ShellTab = "talk" | "lessons" | "grind";
+
+/** Modes inside Talk — not separate pages */
+export type TalkChannel = "chat" | "overhear" | "walk";
 
 export type Chunk = {
   id: string;
@@ -29,7 +27,7 @@ export type VocabItem = {
   gender?: "m" | "f" | "n" | "pl";
   pos: "noun" | "verb" | "adj" | "adv" | "phrase" | "other";
   sentences: { ru: string; en: string; de: string }[];
-  frequency: number; // 1 = most useful for Moscow trip
+  frequency: number;
   domains: string[];
 };
 
@@ -49,7 +47,7 @@ export type NotebookEntry = {
   note?: string;
   kind: NoteKind;
   createdAt: number;
-  source: "manual" | "speak" | "drill" | "walk" | "path";
+  source: "manual" | "speak" | "drill" | "walk" | "path" | "grind";
   meta?: Record<string, string>;
 };
 
@@ -58,7 +56,7 @@ export type Profile = {
   genderPast: "был" | "была";
   tutor: TutorId;
   helpLang: HelpLang;
-  landOn: string; // ISO date
+  landOn: string;
   startedOn: string;
 };
 
@@ -71,8 +69,15 @@ export type TutorMessage = {
   at: number;
 };
 
-export type DrillProgress = {
+export type GrindProgress = {
   seen: Record<string, number>;
   correct: Record<string, number>;
   lastSeen: Record<string, number>;
+  /** lemmas marked solid after enough correct recalls */
+  mastered: Record<string, boolean>;
+  sessionBest: number;
+  totalCorrect: number;
 };
+
+/** @deprecated alias — keep old key readable */
+export type DrillProgress = GrindProgress;
