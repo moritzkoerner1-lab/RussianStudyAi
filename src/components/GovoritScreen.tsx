@@ -1,68 +1,110 @@
 "use client";
 
+import { BendLine, parseBend } from "@/lib/bend";
+import type { AraThreadApi } from "@/hooks/useAraThread";
+import { Postures, SpeakBar, TopBar, TypeFallback } from "@/components/Chrome";
+
 type Props = {
   posture: "govorit" | "sest" | "idti";
   onPosture: (p: "govorit" | "sest" | "idti") => void;
+  thread: AraThreadApi;
 };
 
-export function GovoritScreen({ posture, onPosture }: Props) {
+export function GovoritScreen({ posture, onPosture, thread }: Props) {
+  const {
+    recent,
+    lastAra,
+    draft,
+    setDraft,
+    listening,
+    busy,
+    micError,
+    typing,
+    setTyping,
+    toggleListen,
+    send,
+  } = thread;
+
+  const see = lastAra?.see;
+  const bendParts = parseBend(see?.bend);
+  const showSee = Boolean(see?.bend || lastAra?.native);
+
   return (
     <div className="phone">
-      <div className="top">
-        <span className="brand">ВЖИВУЮ</span>
-        <span className="dot" aria-hidden />
-      </div>
+      <TopBar />
 
       <div className="stage">
-        <p className="line-you">Ты где сейчас?</p>
-        <div className="gap-8" />
-        <p className="line-you">Я в кафе. Я хочу вода.</p>
-        <div className="gap-14" />
-        <p className="line-her">Воду.</p>
-        <div className="gap-10" />
-        <p className="line-help">When you ask, вода becomes воду.</p>
+        {recent.map((t) =>
+          t.role === "user" ? (
+            <div key={t.id}>
+              <p className="line-you">{t.text}</p>
+              <div className="gap-8" />
+            </div>
+          ) : (
+            <div key={t.id}>
+              <p className="line-her">{t.text}</p>
+              {t.help ? (
+                <>
+                  <div className="gap-10" />
+                  <p className="line-help">{t.help}</p>
+                </>
+              ) : null}
+              <div className="gap-14" />
+            </div>
+          ),
+        )}
 
-        <div className="gap-18" />
-        <hr className="hair" />
-        <div className="gap-18" />
+        {draft && listening ? (
+          <>
+            <p className="line-you draft">{draft}</p>
+            <div className="gap-14" />
+          </>
+        ) : null}
 
-        <p className="bend-row">
-          вода → вод<span className="bend-red">у</span>
-        </p>
-        <div className="gap-14" />
-        <p className="native-line">Мне, пожалуйста, воду.</p>
-        <div className="gap-10" />
-        <p className="line-note">В Москве чаще говорят так.</p>
+        {showSee ? (
+          <>
+            <hr className="hair" />
+            <div className="gap-18" />
+            <BendLine from={bendParts.from} to={bendParts.to} bend={see?.bend} />
+            {lastAra?.native ? (
+              <>
+                <div className="gap-14" />
+                <p className="native-line">{lastAra.native}</p>
+              </>
+            ) : null}
+            {see?.gloss ? (
+              <>
+                <div className="gap-10" />
+                <p className="line-note">{see.gloss}</p>
+              </>
+            ) : null}
+          </>
+        ) : null}
       </div>
 
       <div className="bottom">
-        <button type="button" className="speak-bar">
-          <span>Говори</span>
-          <span className="dot" aria-hidden />
-        </button>
-        <div className="postures">
+        {(typing || micError) && (
+          <TypeFallback
+            value={draft}
+            onChange={setDraft}
+            onSend={() => {
+              void send(draft);
+              setTyping(false);
+            }}
+            hint={micError}
+          />
+        )}
+        <SpeakBar listening={listening} busy={busy} onClick={toggleListen} />
+        {!typing && !micError ? (
           <button
             type="button"
-            data-on={posture === "govorit"}
-            onClick={() => onPosture("govorit")}
+            className="type-toggle"
+            onClick={() => setTyping(true)}
           >
-            Говорить
+            писать
           </button>
-          <button
-            type="button"
-            data-on={posture === "sest"}
-            onClick={() => onPosture("sest")}
-          >
-            Сесть
-          </button>
-          <button
-            type="button"
-            data-on={posture === "idti"}
-            onClick={() => onPosture("idti")}
-          >
-            Идти
-          </button>
-        </div>
+        ) : null}
+        <Postures posture={posture} onPosture={onPosture} />
       </div>
     </div>
   );

@@ -19,6 +19,8 @@ export type ThreadTurn = {
   see?: SeeBend;
   /** Correction line Ara gave (right Moscow line) */
   native?: string;
+  /** One short help-language tip under her line */
+  help?: string;
 };
 
 const THREAD_KEY = "vzhivuyu.thread.v1";

@@ -97,6 +97,7 @@ export function mockAraReply(
     return {
       reply: "По-ру́сски. Ещё раз.",
       native: "По-ру́сски, пожа́луйста.",
+      help: helpLang === "de" ? "Auf Russisch bitte." : "In Russian, please.",
       see: {
         bend: "по-ру́сски",
         audio: "По-ру́сски, пожа́луйста.",
@@ -105,15 +106,74 @@ export function mockAraReply(
     };
   }
 
-  // Soft near-miss path
-  if (raw.length > 0 && raw.length < 40) {
+  // Accusative: вода → воду (JS \b is Latin-only — use Cyrillic edges)
+  if (/(^|[^а-яё])вода([^а-яё]|$)/i.test(lower) && !/(^|[^а-яё])воду([^а-яё]|$)/i.test(lower)) {
     return {
-      reply: "Да.",
+      reply: "Воду.",
+      native: "Мне, пожалуйста, воду.",
+      help:
+        helpLang === "de"
+          ? "Wenn du bestellst, wird вода zu воду."
+          : "When you ask, вода becomes воду.",
+      see: {
+        bend: "вода → воду",
+        audio: "Мне, пожалуйста, воду.",
+        gloss:
+          helpLang === "de"
+            ? "In Moskau sagt man es so."
+            : "В Москве чаще говорят так.",
+      },
     };
+  }
+
+  if (/(^|[^а-яё])воду([^а-яё]|$)/i.test(lower) || /мне,?\s*пожалуйста,?\s*воду/i.test(lower)) {
+    return {
+      reply: "Да. Ещё что-нибудь?",
+      see: {
+        bend: "воду",
+        audio: "Ещё что-нибудь?",
+      },
+    };
+  }
+
+  if (/кафе|где\s+сейчас|(^|[^а-яё])я\s+в([^а-яё]|$)/i.test(lower)) {
+    return {
+      reply: "Хорошо. Что хочешь?",
+      native: "Что вы хотите?",
+      see: {
+        bend: "хоти́те",
+        audio: "Что вы хотите?",
+        gloss: helpLang === "de" ? "Was möchten Sie?" : "What do you want?",
+      },
+    };
+  }
+
+  if (/спасибо|благодар/i.test(lower)) {
+    return {
+      reply: "Пожа́луйста.",
+      see: {
+        bend: "пожа́луйста",
+        audio: "Пожа́луйста.",
+      },
+    };
+  }
+
+  if (/^(да|нет)([!.]?)$/i.test(lower)) {
+    return { reply: "Хорошо." };
+  }
+
+  // Soft path only when they already sound complete (not a known miss)
+  if (
+    /[а-яё]{3,}/i.test(raw) &&
+    raw.length < 28 &&
+    !/я\s+хочу/i.test(lower)
+  ) {
+    return { reply: "Да." };
   }
 
   return {
     reply: "Ещё раз, чуть ме́дленнее.",
+    help: helpLang === "de" ? "Noch einmal, etwas langsamer." : "Once more, a bit slower.",
     see: {
       bend: "ме́дленнее",
       audio: "Говори́те ме́дленнее.",

@@ -1,49 +1,55 @@
 "use client";
 
+import type { AraThreadApi } from "@/hooks/useAraThread";
+import { Postures, SpeakBar, TopBar, TypeFallback } from "@/components/Chrome";
+
 type Props = {
   posture: "govorit" | "sest" | "idti";
   onPosture: (p: "govorit" | "sest" | "idti") => void;
+  thread: AraThreadApi;
 };
 
-/** Same chrome only — content deferred. */
-export function IdtiScreen({ posture, onPosture }: Props) {
+/** Same chrome — walk tray later. Thread still lives here. */
+export function IdtiScreen({ posture, onPosture, thread }: Props) {
+  const {
+    lastAra,
+    draft,
+    setDraft,
+    listening,
+    busy,
+    micError,
+    typing,
+    setTyping,
+    toggleListen,
+    send,
+  } = thread;
+
   return (
     <div className="phone">
-      <div className="top">
-        <span className="brand">ВЖИВУЮ</span>
-        <span className="dot" aria-hidden />
+      <TopBar />
+
+      <div className="stage">
+        <p className="kicker">Идти</p>
+        <div className="gap-18" />
+        <p className="line-her">{lastAra?.text || "Пойдём."}</p>
+        <div className="gap-10" />
+        <p className="line-help">Камера — позже. Пока говори здесь.</p>
       </div>
 
-      <div className="stage" />
-
       <div className="bottom">
-        <button type="button" className="speak-bar">
-          <span>Говори</span>
-          <span className="dot" aria-hidden />
-        </button>
-        <div className="postures">
-          <button
-            type="button"
-            data-on={posture === "govorit"}
-            onClick={() => onPosture("govorit")}
-          >
-            Говорить
-          </button>
-          <button
-            type="button"
-            data-on={posture === "sest"}
-            onClick={() => onPosture("sest")}
-          >
-            Сесть
-          </button>
-          <button
-            type="button"
-            data-on={posture === "idti"}
-            onClick={() => onPosture("idti")}
-          >
-            Идти
-          </button>
-        </div>
+        {(typing || micError) && (
+          <TypeFallback
+            value={draft}
+            onChange={setDraft}
+            onSend={() => {
+              void send(draft);
+              setTyping(false);
+            }}
+            hint={micError}
+          />
+        )}
+        <SpeakBar listening={listening} busy={busy} onClick={toggleListen} />
+        <Postures posture={posture} onPosture={onPosture} />
       </div>
     </div>
   );
