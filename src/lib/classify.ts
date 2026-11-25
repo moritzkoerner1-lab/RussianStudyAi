@@ -13,5 +13,6 @@ export function classifyLocal(text: string): NoteKind {
   if (grammarHints.test(t)) return "grammar";
   if (usecaseHints.test(t) || t.includes("—") || t.includes("→")) return "usecase";
   if (t.split(/\s+/).length >= 3 || /[.!?…]/.test(t)) return "phrase";
+  // Colloquial one-word glue still counts as a keepable "word"
   return "word";
 }

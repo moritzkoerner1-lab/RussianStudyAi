@@ -99,6 +99,15 @@ button {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.deck input,
+.deck textarea,
+.deck [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .deck::-webkit-scrollbar {

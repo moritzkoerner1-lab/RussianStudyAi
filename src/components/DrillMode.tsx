@@ -207,7 +207,7 @@ export function DrillMode({ profile }: { profile: Profile }) {
                 {tokens.join(" ") || "…"}
               </p>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex min-h-[4.5rem] flex-wrap content-start gap-2">
               {wordPool.map((w, i) => (
                 <button
                   key={`${w}-${i}`}
